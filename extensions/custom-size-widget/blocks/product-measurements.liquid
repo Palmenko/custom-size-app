@@ -1,0 +1,138 @@
+{% comment %}
+  Блок для отображения мерок в карточке товара
+  Этот блок можно добавить в карточку товара через редактор тем
+{% endcomment %}
+
+{% assign show_measurements = block.settings.show_measurements | default: true %}
+{% assign title = block.settings.title | default: 'Ваши мерки' %}
+{% assign show_description = block.settings.show_description | default: true %}
+
+{% if show_measurements %}
+  <div class="product-measurements-block" 
+       data-block-id="{{ block.id }}"
+       data-show-description="{{ show_description }}">
+    
+    {% if title != blank %}
+      <h3 class="product-measurements-title">{{ title }}</h3>
+    {% endif %}
+    
+    {% if show_description %}
+      <p class="product-measurements-description">
+        Укажите ваши мерки для подбора правильного размера
+      </p>
+    {% endif %}
+    
+    {% render 'measurement-form' %}
+  </div>
+
+  <style>
+    .product-measurements-block {
+      margin: 20px 0;
+      padding: 0;
+    }
+    .product-measurements-title {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    .product-measurements-description {
+      margin: 0 0 15px 0;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+    }
+    .product-measurements-block .measurement-form-container {
+      margin: 0;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    @media (max-width: 768px) {
+      .product-measurements-block {
+        margin: 15px 0;
+      }
+      .product-measurements-title {
+        font-size: 15px;
+      }
+      .product-measurements-description {
+        font-size: 13px;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        const block = document.querySelector('.product-measurements-block');
+        if (!block) {
+          console.log('Блок product-measurements-block не найден');
+          return;
+        }
+        
+        const formContainer = block.querySelector('.measurement-form-container');
+        if (!formContainer) {
+          console.log('Контейнер формы мерок не найден в блоке');
+          return;
+        }
+        
+        formContainer.addEventListener('measurementsChanged', function(event) {
+          try {
+            const measurements = event.detail.measurements;
+            const addToCartForm = document.querySelector('form[action*="/cart/add"]');
+            if (addToCartForm) {
+              addToCartForm.querySelectorAll('input[name^="measurement_"]').forEach(input => {
+                input.remove();
+              });
+              Object.entries(measurements).forEach(([id, value]) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `measurement_${id}`;
+                input.value = value;
+                addToCartForm.appendChild(input);
+              });
+            }
+            const customEvent = new CustomEvent('productMeasurementsChanged', {
+              detail: { 
+                measurements: measurements,
+                productId: '{{ product.id }}'
+              }
+            });
+            document.dispatchEvent(customEvent);
+          } catch (error) {
+            console.error('Ошибка при обработке события measurementsChanged:', error);
+          }
+        });
+      } catch (error) {
+        console.error('Ошибка при инициализации product-measurements-block:', error);
+      }
+    });
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Мерки товара",
+  "target": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_measurements",
+      "label": "Показывать мерки",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Заголовок",
+      "default": "Ваши мерки"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Показывать описание",
+      "default": true
+    }
+  ]
+}
+{% endschema %} 

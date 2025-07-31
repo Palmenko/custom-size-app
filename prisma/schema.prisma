@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  shop      String
+  state     String
+  isOnline  Boolean  @default(false)
+  scope     String?
+  expires   DateTime?
+  accessToken String?
+  userId    BigInt?
+  firstName String?
+  lastName  String?
+  email     String?
+  accountOwner Boolean @default(false)
+  locale    String?
+  collaborator Boolean @default(false)
+  emailVerified Boolean @default(false)
+}
+
+model Measurement {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  unit        String   @default("см")
+  minValue    Float    @default(0)
+  maxValue    Float    @default(200)
+  step        Float    @default(0.5)
+  required    Boolean  @default(false)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groupMeasurements GroupMeasurement[]
+}
+
+model ProductGroup {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  type        String   // 'tag', 'type', 'vendor', 'template', 'collection'
+  value       String   // значение для фильтрации
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groupMeasurements GroupMeasurement[]
+}
+
+model GroupMeasurement {
+  id            Int          @id @default(autoincrement())
+  groupId       Int
+  measurementId Int
+  active        Boolean      @default(true)
+  sortOrder     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  group       ProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  measurement Measurement  @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, measurementId])
+}
+

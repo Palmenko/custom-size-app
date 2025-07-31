@@ -1,0 +1,59 @@
+{% comment %} 
+<div id="custom-size-widget" data-product-id="{{ product.admin_graphql_api_id }}">
+    <button type="button" onclick="toggleCustomSizeForm()">Enter Custom Size</button>
+    <div id="custom-size-form" style="display:none; margin-top: 10px;">
+      <label>Height (cm): <input type="text" name="height" /></label><br>
+      <label>Bust (cm): <input type="text" name="bust" /></label><br>
+      <label>Waist (cm): <input type="text" name="waist" /></label><br>
+      <label>Hips (cm): <input type="text" name="hips" /></label><br>
+    </div>
+  </div> {% endcomment %}
+
+
+  <div id="custom-size-widget" data-product-id="{{ product.admin_graphql_api_id }}">
+  <button type="button" onclick="toggleCustomSizeForm()">Enter Custom Size</button>
+  <div id="custom-size-form" style="display:none; margin-top: 10px;">
+    <!-- тут динамические поля вставятся -->
+  </div>
+</div>
+
+<script>
+  async function fetchMeasurements() {
+    // вызови API приложения, которое отдаст список мерок из базы
+    // например: [{name: 'Height', min: 100, max: 200}, {name: 'Bust', min: 50, max: 150}, ...]
+    const response = await fetch('/api/measurements'); // замени на реальный эндпоинт
+    return await response.json();
+  }
+
+  async function renderForm() {
+    const formDiv = document.getElementById('custom-size-form');
+    const measurements = await fetchMeasurements();
+
+    formDiv.innerHTML = ''; // очистить форму
+
+    measurements.forEach(m => {
+      const label = document.createElement('label');
+      label.textContent = `${m.name} (см): `;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = m.name.toLowerCase();
+      input.min = m.min;
+      input.max = m.max;
+
+      label.appendChild(input);
+      formDiv.appendChild(label);
+      formDiv.appendChild(document.createElement('br'));
+    });
+  }
+
+  function toggleCustomSizeForm() {
+    const formDiv = document.getElementById('custom-size-form');
+    if (formDiv.style.display === 'none') {
+      formDiv.style.display = 'block';
+      renderForm(); // при показе формы рендерим динамические поля
+    } else {
+      formDiv.style.display = 'none';
+    }
+  }
+</script>

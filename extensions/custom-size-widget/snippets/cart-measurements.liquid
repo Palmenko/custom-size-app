@@ -1,0 +1,65 @@
+{% comment %}
+  Сниппет для отображения мерок в корзине
+  Используйте: {% render 'cart-measurements', item: cart_item %}
+{% endcomment %}
+
+{% if item.properties %}
+  {% assign has_measurements = false %}
+  {% for property in item.properties %}
+    {% if property.first contains 'Рост' or property.first contains 'Обхват' or property.first contains 'Длина' %}
+      {% assign has_measurements = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  
+  {% if has_measurements %}
+    <div class="cart-item-measurements">
+      <h4>Мерки:</h4>
+      <ul class="measurements-list">
+        {% for property in item.properties %}
+          {% if property.first contains 'Рост' or property.first contains 'Обхват' or property.first contains 'Длина' %}
+            <li class="measurement-item">
+              <span class="measurement-name">{{ property.first }}:</span>
+              <span class="measurement-value">{{ property.last }}</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+    
+    <style>
+      .cart-item-measurements {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #007cba;
+      }
+      .cart-item-measurements h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+      .measurements-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .measurement-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+      .measurement-name {
+        color: #666;
+        font-weight: 500;
+      }
+      .measurement-value {
+        color: #333;
+        font-weight: 600;
+      }
+    </style>
+  {% endif %}
+{% endif %} 

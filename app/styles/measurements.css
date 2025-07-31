@@ -1,0 +1,36 @@
+.Polaris-DataTable__Table {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e1e1e1;
+}
+.Polaris-DataTable__Table th,
+.Polaris-DataTable__Table td {
+  padding: 10px 14px;
+  font-size: 15px;
+}
+.Polaris-DataTable__Table th {
+  background: #f6f6f7;
+  font-weight: 600;
+  color: #333;
+}
+.Polaris-DataTable__Table tr:hover {
+  background: #f0f4f8;
+}
+.Polaris-Button {
+  margin-right: 8px;
+}
+.Polaris-Modal-Dialog {
+  border-radius: 12px;
+}
+.Polaris-TextField {
+  margin-bottom: 12px;
+}
+.Polaris-Checkbox {
+  margin-bottom: 8px;
+}
+.Polaris-Page {
+  background: #fafbfc;
+}
+.Polaris-Card {
+  margin-top: 24px;
+} 

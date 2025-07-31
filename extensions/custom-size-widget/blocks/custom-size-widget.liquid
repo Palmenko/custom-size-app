@@ -1,0 +1,16 @@
+
+<span style="color:{{ block.settings.colour }}">
+  {% render 'custom-size-widget'%}
+   {% render 'stars'%}
+    {% render 'measurement-form'%}
+</span>
+
+{% schema %}
+{
+  "name": "Custom Size Widget",
+  "target": "section",
+  "javascript": "custom-size.js",
+  "settings": [
+  ]
+}
+{% endschema %}
