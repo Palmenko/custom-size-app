@@ -15,6 +15,8 @@ export default async function handleRequest(
 ) {
   console.log("🚀 Server started, handling request:", request.url);
   console.log("📡 Port:", process.env.PORT || "3000");
+  console.log("🌍 Environment:", process.env.NODE_ENV || "development");
+  console.log("⏰ Time:", new Date().toISOString());
   
   addDocumentResponseHeaders(request, responseHeaders);
   const userAgent = request.headers.get("user-agent");
