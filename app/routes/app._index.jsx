@@ -1,418 +1,227 @@
-// import { useEffect } from "react";
-// import { useFetcher } from "@remix-run/react";
-// import {
-//   Page,
-//   Layout,
-//   Text,
-//   Card,
-//   Button,
-//   BlockStack,
-//   Box,
-//   List,
-//   Link,
-//   InlineStack,
-// } from "@shopify/polaris";
-// import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
-// import { authenticate } from "../shopify.server";
+import { useEffect } from "react";
+import { useFetcher } from "@remix-run/react";
+import {
+  Page,
+  Layout,
+  Text,
+  Card,
+  Button,
+  BlockStack,
+  Box,
+  List,
+  Link,
+  InlineStack,
+  DataTable,
+  Badge,
+} from "@shopify/polaris";
+import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
+import { authenticate } from "../shopify.server";
+import { json } from "@remix-run/node";
+import { PrismaClient } from "@prisma/client";
 
-// export const loader = async ({ request }) => {
-//   await authenticate.admin(request);
+const prisma = new PrismaClient();
 
-//   return null;
-// };
+export const loader = async ({ request }) => {
+  await authenticate.admin(request);
 
-// export const action = async ({ request }) => {
-//   const { admin } = await authenticate.admin(request);
-//   const color = ["Red", "Orange", "Yellow", "Green"][
-//     Math.floor(Math.random() * 4)
-//   ];
-//   const response = await admin.graphql(
-//     `#graphql
-//       mutation populateProduct($product: ProductCreateInput!) {
-//         productCreate(product: $product) {
-//           product {
-//             id
-//             title
-//             handle
-//             status
-//             variants(first: 10) {
-//               edges {
-//                 node {
-//                   id
-//                   price
-//                   barcode
-//                   createdAt
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }`,
-//     {
-//       variables: {
-//         product: {
-//           title: `${color} Snowboard`,
-//         },
-//       },
-//     },
-//   );
-//   const responseJson = await response.json();
-//   const product = responseJson.data.productCreate.product;
-//   const variantId = product.variants.edges[0].node.id;
-//   const variantResponse = await admin.graphql(
-//     `#graphql
-//     mutation shopifyRemixTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-//       productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-//         productVariants {
-//           id
-//           price
-//           barcode
-//           createdAt
-//         }
-//       }
-//     }`,
-//     {
-//       variables: {
-//         productId: product.id,
-//         variants: [{ id: variantId, price: "100.00" }],
-//       },
-//     },
-//   );
-//   const variantResponseJson = await variantResponse.json();
+  try {
+    // Получаем статистику
+    const measurementsCount = await prisma.measurement.count();
+    const activeMeasurementsCount = await prisma.measurement.count({
+      where: { active: true }
+    });
+    const productGroupsCount = await prisma.productGroup.count();
+    const activeProductGroupsCount = await prisma.productGroup.count({
+      where: { active: true }
+    });
 
-//   return {
-//     product: responseJson.data.productCreate.product,
-//     variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
-//   };
-// };
+    // Получаем последние мерки
+    const recentMeasurements = await prisma.measurement.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' }
+    });
 
-// export default function Index() {
-//   const fetcher = useFetcher();
-//   const shopify = useAppBridge();
-//   const isLoading =
-//     ["loading", "submitting"].includes(fetcher.state) &&
-//     fetcher.formMethod === "POST";
-//   const productId = fetcher.data?.product?.id.replace(
-//     "gid://shopify/Product/",
-//     "",
-//   );
-
-//   useEffect(() => {
-//     if (productId) {
-//       shopify.toast.show("Product created");
-//     }
-//   }, [productId, shopify]);
-//   const generateProduct = () => fetcher.submit({}, { method: "POST" });
-
-//   return (
-//     <Page>
-//       <TitleBar title="Overview">
-//         {/* <button variant="primary" onClick={generateProduct}>
-//           Generate a product
-//         </button> */}
-//       </TitleBar>
-//       <BlockStack gap="500">
-//         <Layout>
-//           <Layout.Section>
-//             <Card>
-//               <BlockStack gap="500">
-//                 <BlockStack gap="200">
-//                   <Text as="h2" variant="headingMd">
-//                     Congrats on creating a new Shopify app 🎉
-//                   </Text>
-//                   <Text variant="bodyMd" as="p">
-//                     This embedded app template uses{" "}
-//                     <Link
-//                       url="https://shopify.dev/docs/apps/tools/app-bridge"
-//                       target="_blank"
-//                       removeUnderline
-//                     >
-//                       App Bridge
-//                     </Link>{" "}
-//                     interface examples like an{" "}
-//                     <Link url="/app/additional" removeUnderline>
-//                       additional page in the app nav
-//                     </Link>
-//                     , as well as an{" "}
-//                     <Link
-//                       url="https://shopify.dev/docs/api/admin-graphql"
-//                       target="_blank"
-//                       removeUnderline
-//                     >
-//                       Admin GraphQL
-//                     </Link>{" "}
-//                     mutation demo, to provide a starting point for app
-//                     development.
-//                   </Text>
-//                 </BlockStack>
-//                 <BlockStack gap="200">
-//                   <Text as="h3" variant="headingMd">
-//                     Get started with products
-//                   </Text>
-//                   <Text as="p" variant="bodyMd">
-//                     Generate a product with GraphQL and get the JSON output for
-//                     that product. Learn more about the{" "}
-//                     <Link
-//                       url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-//                       target="_blank"
-//                       removeUnderline
-//                     >
-//                       productCreate
-//                     </Link>{" "}
-//                     mutation in our API references.
-//                   </Text>
-//                 </BlockStack>
-//                 <InlineStack gap="300">
-//                   <Button loading={isLoading} onClick={generateProduct}>
-//                     Generate a product
-//                   </Button>
-//                   {fetcher.data?.product && (
-//                     <Button
-//                       url={`shopify:admin/products/${productId}`}
-//                       target="_blank"
-//                       variant="plain"
-//                     >
-//                       View product
-//                     </Button>
-//                   )}
-//                 </InlineStack>
-//                 {fetcher.data?.product && (
-//                   <>
-//                     <Text as="h3" variant="headingMd">
-//                       {" "}
-//                       productCreate mutation
-//                     </Text>
-//                     <Box
-//                       padding="400"
-//                       background="bg-surface-active"
-//                       borderWidth="025"
-//                       borderRadius="200"
-//                       borderColor="border"
-//                       overflowX="scroll"
-//                     >
-//                       <pre style={{ margin: 0 }}>
-//                         <code>
-//                           {JSON.stringify(fetcher.data.product, null, 2)}
-//                         </code>
-//                       </pre>
-//                     </Box>
-//                     <Text as="h3" variant="headingMd">
-//                       {" "}
-//                       productVariantsBulkUpdate mutation
-//                     </Text>
-//                     <Box
-//                       padding="400"
-//                       background="bg-surface-active"
-//                       borderWidth="025"
-//                       borderRadius="200"
-//                       borderColor="border"
-//                       overflowX="scroll"
-//                     >
-//                       <pre style={{ margin: 0 }}>
-//                         <code>
-//                           {JSON.stringify(fetcher.data.variant, null, 2)}
-//                         </code>
-//                       </pre>
-//                     </Box>
-//                   </>
-//                 )}
-//               </BlockStack>
-//             </Card>
-//           </Layout.Section>
-//           <Layout.Section variant="oneThird">
-//             <BlockStack gap="500">
-//               <Card>
-//                 <BlockStack gap="200">
-//                   <Text as="h2" variant="headingMd">
-//                     App template specs
-//                   </Text>
-//                   <BlockStack gap="200">
-//                     <InlineStack align="space-between">
-//                       <Text as="span" variant="bodyMd">
-//                         Framework
-//                       </Text>
-//                       <Link
-//                         url="https://remix.run"
-//                         target="_blank"
-//                         removeUnderline
-//                       >
-//                         Remix
-//                       </Link>
-//                     </InlineStack>
-//                     <InlineStack align="space-between">
-//                       <Text as="span" variant="bodyMd">
-//                         Database
-//                       </Text>
-//                       <Link
-//                         url="https://www.prisma.io/"
-//                         target="_blank"
-//                         removeUnderline
-//                       >
-//                         Prisma
-//                       </Link>
-//                     </InlineStack>
-//                     <InlineStack align="space-between">
-//                       <Text as="span" variant="bodyMd">
-//                         Interface
-//                       </Text>
-//                       <span>
-//                         <Link
-//                           url="https://polaris.shopify.com"
-//                           target="_blank"
-//                           removeUnderline
-//                         >
-//                           Polaris
-//                         </Link>
-//                         {", "}
-//                         <Link
-//                           url="https://shopify.dev/docs/apps/tools/app-bridge"
-//                           target="_blank"
-//                           removeUnderline
-//                         >
-//                           App Bridge
-//                         </Link>
-//                       </span>
-//                     </InlineStack>
-//                     <InlineStack align="space-between">
-//                       <Text as="span" variant="bodyMd">
-//                         API
-//                       </Text>
-//                       <Link
-//                         url="https://shopify.dev/docs/api/admin-graphql"
-//                         target="_blank"
-//                         removeUnderline
-//                       >
-//                         GraphQL API
-//                       </Link>
-//                     </InlineStack>
-//                   </BlockStack>
-//                 </BlockStack>
-//               </Card>
-//               <Card>
-//                 <BlockStack gap="200">
-//                   <Text as="h2" variant="headingMd">
-//                     Next steps
-//                   </Text>
-//                   <List>
-//                     <List.Item>
-//                       Build an{" "}
-//                       <Link
-//                         url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-//                         target="_blank"
-//                         removeUnderline
-//                       >
-//                         {" "}
-//                         example app
-//                       </Link>{" "}
-//                       to get started
-//                     </List.Item>
-//                     <List.Item>
-//                       Explore Shopify’s API with{" "}
-//                       <Link
-//                         url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-//                         target="_blank"
-//                         removeUnderline
-//                       >
-//                         GraphiQL
-//                       </Link>
-//                     </List.Item>
-//                   </List>
-//                 </BlockStack>
-//               </Card>
-//             </BlockStack>
-//           </Layout.Section>
-//         </Layout>
-//       </BlockStack>
-//     </Page>
-//   );
-// }
-
-
-
-
-import { Card, Page, Layout, BlockStack, Button, InlineStack, Checkbox, Select } from '@shopify/polaris';
-import { useState } from 'react';
-import { json, useLoaderData } from "@remix-run/react";
-import { authenticate } from "../shopify.server"; // уже встроено
-import fs from 'fs/promises';
-  import path from 'path';
-
-export async function loader({ request }) {
-  const { admin } = await authenticate.admin(request);
-
-  // Получаем товары (максимум 50 для теста)
-  const products = await admin.graphql(`
-    {
-      products(first: 50) {
-        edges {
-          node {
-            id
-            title
+    // Получаем последние группы товаров
+    const recentProductGroups = await prisma.productGroup.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        groupMeasurements: {
+          include: {
+            measurement: true
           }
         }
       }
-    }
-  `);
+    });
 
-  const parsed = await products.json();
+    return json({
+      stats: {
+        totalMeasurements: measurementsCount,
+        activeMeasurements: activeMeasurementsCount,
+        totalProductGroups: productGroupsCount,
+        activeProductGroups: activeProductGroupsCount
+      },
+      recentMeasurements,
+      recentProductGroups
+    });
+  } catch (error) {
+    console.error('Ошибка при загрузке данных:', error);
+    return json({
+      stats: {
+        totalMeasurements: 0,
+        activeMeasurements: 0,
+        totalProductGroups: 0,
+        activeProductGroups: 0
+      },
+      recentMeasurements: [],
+      recentProductGroups: []
+    });
+  }
+};
 
-  const items = parsed.data.products.edges.map(({ node }) => ({
-    label: node.title,
-    value: node.id,
-  }));
-
-  return json({ products: items });
-}
-
-export default function HomePage() {
-  const { products } = useLoaderData();
-  const [formEnabled, setFormEnabled] = useState(true);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  // const [shopDomain] = useState("{{shopDomain}}"); // для примера
-
-  const handleToggle = () => setFormEnabled(!formEnabled);
-  
-  const SETTINGS_FILE = path.resolve('shop-settings.json');
-  
-  const handleSave = async () => {
-    const data = {
-      enabled: formEnabled,
-      products: selectedProducts,
-    };
-  
-    await fs.writeFile(SETTINGS_FILE, JSON.stringify(data, null, 2));
-    alert("Settings saved!");
-  };
-
-  const productOptions = products;
+export default function Index() {
+  const { stats, recentMeasurements, recentProductGroups } = useLoaderData();
+  const shopify = useAppBridge();
 
   return (
-    <Page title="Custom Size Settings">
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <Checkbox
-                label="Enable custom size form"
-                checked={formEnabled}
-                onChange={handleToggle}
-              />
-
-              <Select
-                label="Apply form to products"
-                options={productOptions}
-                onChange={setSelectedProducts}
-                value={selectedProducts}
-                multiple
-              />
-
-              <InlineStack gap="400" align="end">
-                <Button variant="primary" onClick={handleSave}>Save settings</Button>
-              </InlineStack>
+    <Page>
+      <TitleBar title="Панель управления мерками" />
+      <BlockStack gap="500">
+        <Layout>
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="500">
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Добро пожаловать в приложение Custom Size! 🎉
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    Управляйте мерками для ваших товаров и создавайте группы товаров для автоматического отображения форм с мерками.
+                  </Text>
+                </BlockStack>
+                
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">
+                    Статистика
+                  </Text>
+                  <InlineStack gap="400">
+                    <Card>
+                      <BlockStack gap="200">
+                        <Text variant="headingLg" as="h4">
+                          {stats.totalMeasurements}
+                        </Text>
+                        <Text variant="bodySm" as="p">
+                          Всего мерок
+                        </Text>
+                        <Badge tone={stats.activeMeasurements > 0 ? "success" : "warning"}>
+                          {stats.activeMeasurements} активных
+                        </Badge>
+                      </BlockStack>
+                    </Card>
+                    
+                    <Card>
+                      <BlockStack gap="200">
+                        <Text variant="headingLg" as="h4">
+                          {stats.totalProductGroups}
+                        </Text>
+                        <Text variant="bodySm" as="p">
+                          Групп товаров
+                        </Text>
+                        <Badge tone={stats.activeProductGroups > 0 ? "success" : "warning"}>
+                          {stats.activeProductGroups} активных
+                        </Badge>
+                      </BlockStack>
+                    </Card>
+                  </InlineStack>
+                </BlockStack>
+              </BlockStack>
+            </Card>
+          </Layout.Section>
+          
+          <Layout.Section variant="oneThird">
+            <BlockStack gap="500">
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Быстрые действия
+                  </Text>
+                  <BlockStack gap="200">
+                    <Button
+                      url="/app/measurements"
+                      variant="primary"
+                      fullWidth
+                    >
+                      Управление мерками
+                    </Button>
+                    <Button
+                      url="/app/product-groups"
+                      variant="primary"
+                      fullWidth
+                    >
+                      Группы товаров
+                    </Button>
+                    <Button
+                      url="/app/settings"
+                      variant="plain"
+                      fullWidth
+                    >
+                      Настройки
+                    </Button>
+                  </BlockStack>
+                </BlockStack>
+              </Card>
+              
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Последние мерки
+                  </Text>
+                  {recentMeasurements.length > 0 ? (
+                    <List>
+                      {recentMeasurements.map((measurement) => (
+                        <List.Item key={measurement.id}>
+                          {measurement.name}
+                          <Badge tone={measurement.active ? "success" : "warning"}>
+                            {measurement.active ? "Активна" : "Неактивна"}
+                          </Badge>
+                        </List.Item>
+                      ))}
+                    </List>
+                  ) : (
+                    <Text variant="bodyMd" as="p" tone="subdued">
+                      Мерки не найдены
+                    </Text>
+                  )}
+                </BlockStack>
+              </Card>
+              
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Последние группы товаров
+                  </Text>
+                  {recentProductGroups.length > 0 ? (
+                    <List>
+                      {recentProductGroups.map((group) => (
+                        <List.Item key={group.id}>
+                          {group.name}
+                          <Text variant="bodySm" as="span" tone="subdued">
+                            ({group.groupMeasurements.length} мерок)
+                          </Text>
+                        </List.Item>
+                      ))}
+                    </List>
+                  ) : (
+                    <Text variant="bodyMd" as="p" tone="subdued">
+                      Группы товаров не найдены
+                    </Text>
+                  )}
+                </BlockStack>
+              </Card>
             </BlockStack>
-          </Card>
-        </Layout.Section>
-      </Layout>
+          </Layout.Section>
+        </Layout>
+      </BlockStack>
     </Page>
   );
 }
