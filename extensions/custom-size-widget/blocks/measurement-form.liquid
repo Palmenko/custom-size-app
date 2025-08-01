@@ -7,15 +7,15 @@
 
 <div class="custom-size-container" 
      data-app-url="{{ app_url }}"
-     data-shop-url="{{ shop.url }}"
+     data-shop-url="{{ shop.url }}" 
      data-product-id="{{ product.id }}"
      style="display: none;">
   
   <div class="custom-size-form">
     <h3 class="custom-size-title">Ваши мерки для custom size</h3>
     <div class="custom-size-loading" style="display: block;">
-      <p>Загрузка мерок...</p>
-    </div>
+    <p>Загрузка мерок...</p>
+  </div>
     <div class="custom-size-content" style="display: none;">
       <div class="custom-size-fields"></div>
       <div class="custom-size-error" style="display: none;"></div>
@@ -232,13 +232,13 @@
           
           const contentType = response.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
+const text = await response.text();
             console.error('Получен не-JSON ответ:', text);
             throw new Error('Сервер вернул не-JSON ответ');
           }
           
           const data = await response.json();
-          
+
           if (data.error) {
             throw new Error(data.error);
           }
@@ -311,8 +311,8 @@
         const inputs = fieldsEl.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
           if (input) {
-            input.addEventListener('input', handleInputChange);
-            input.addEventListener('blur', handleInputBlur);
+          input.addEventListener('input', handleInputChange);
+          input.addEventListener('blur', handleInputBlur);
           }
         });
       }
@@ -701,7 +701,7 @@
           console.log('Инициализация формы мерок');
           
           // Загружаем мерки
-          loadMeasurements();
+      loadMeasurements();
           
           // Настраиваем отслеживание изменений вариаций
           setupVariantChangeListener();
@@ -902,7 +902,7 @@
       container.style.display = 'block';
     });
   </script>
-</div>
+</div> 
 
 {% schema %}
 {

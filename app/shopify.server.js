@@ -7,7 +7,8 @@ const envVars = {
   SHOPIFY_API_SECRET: process.env.SHOPIFY_API_SECRET,
   SHOPIFY_APP_URL: process.env.SHOPIFY_APP_URL,
   HOST: process.env.HOST,
-  NODE_ENV: process.env.NODE_ENV
+  NODE_ENV: process.env.NODE_ENV,
+  VERCEL_URL: process.env.VERCEL_URL
 };
 
 console.log("🔧 Environment variables:", envVars);
