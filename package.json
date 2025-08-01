@@ -18,7 +18,10 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+    "seed:measurements": "node scripts/seed-measurements.js",
+    "seed:groups": "node scripts/seed-product-groups.cjs",
+    "seed:all": "npm run seed:measurements && npm run seed:groups"
   },
   "type": "module",
   "engines": {

@@ -13,6 +13,7 @@ import {
   InlineStack,
   DataTable,
   Badge,
+  Toast,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
@@ -82,6 +83,20 @@ export const loader = async ({ request }) => {
 export default function Index() {
   const { stats, recentMeasurements, recentProductGroups } = useLoaderData();
   const shopify = useAppBridge();
+  const fetcher = useFetcher();
+
+  // Показываем уведомление о результате заполнения базы данных
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      shopify.toast.show("База данных заполнена тестовыми данными!");
+    } else if (fetcher.data?.error) {
+      shopify.toast.show("Ошибка при заполнении базы данных");
+    }
+  }, [fetcher.data, shopify]);
+
+  const handleSeedData = () => {
+    fetcher.submit({}, { method: "POST", action: "/api/seed" });
+  };
 
   return (
     <Page>
@@ -134,6 +149,27 @@ export default function Index() {
                     </Card>
                   </InlineStack>
                 </BlockStack>
+
+                {/* Кнопка для заполнения тестовыми данными */}
+                {stats.totalMeasurements === 0 && (
+                  <Card>
+                    <BlockStack gap="400">
+                      <Text as="h3" variant="headingMd">
+                        🚀 Быстрый старт
+                      </Text>
+                      <Text variant="bodyMd" as="p">
+                        База данных пуста. Добавьте тестовые мерки и группы товаров для начала работы.
+                      </Text>
+                      <Button
+                        primary
+                        onClick={handleSeedData}
+                        loading={fetcher.state === "submitting"}
+                      >
+                        Добавить тестовые данные
+                      </Button>
+                    </BlockStack>
+                  </Card>
+                )}
               </BlockStack>
             </Card>
           </Layout.Section>
