@@ -1,21 +1,23 @@
+# Use the official Node.js runtime as the base image
 FROM node:18-alpine
-RUN apk add --no-cache openssl
 
-EXPOSE 3000
-
+# Set the working directory
 WORKDIR /app
 
-ENV NODE_ENV=production
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-COPY package.json package-lock.json* ./
+# Install dependencies
+RUN npm ci --only=production
 
-RUN npm ci --omit=dev && npm cache clean --force
-# Remove CLI packages since we don't need them in production by default.
-# Remove this line if you want to run CLI commands in your container.
-RUN npm remove @shopify/cli
-
+# Copy the rest of the application
 COPY . .
 
-RUN npm run build
+# Generate Prisma client
+RUN npx prisma generate
 
-CMD ["npm", "run", "docker-start"]
+# Expose the port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
