@@ -4,16 +4,47 @@ import { restResources } from "@shopify/shopify-api/rest/admin/2024-01";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { PrismaClient } from "@prisma/client";
 
+// Проверяем необходимые переменные окружения
+const requiredEnvVars = {
+  SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY,
+  SHOPIFY_API_SECRET: process.env.SHOPIFY_API_SECRET,
+  SHOPIFY_APP_URL: process.env.SHOPIFY_APP_URL,
+  DATABASE_URL: process.env.DATABASE_URL
+};
+
+// Проверяем, что все переменные настроены
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([key, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  console.error('❌ Отсутствуют переменные окружения:', missingVars);
+  console.error('Пожалуйста, настройте следующие переменные в Vercel Dashboard:');
+  missingVars.forEach(varName => {
+    console.error(`  - ${varName}`);
+  });
+}
+
 const prisma = new PrismaClient();
 
+// Создаем session storage с обработкой ошибок
+let prismaSessionStorage;
+try {
+  prismaSessionStorage = new PrismaSessionStorage(prisma);
+  console.log('✅ PrismaSessionStorage инициализирован');
+} catch (error) {
+  console.error('❌ Ошибка инициализации PrismaSessionStorage:', error);
+  throw error;
+}
+
 const shopify = shopifyApp({
-  apiKey: process.env.SHOPIFY_API_KEY,
-  apiSecretKey: process.env.SHOPIFY_API_SECRET,
+  apiKey: process.env.SHOPIFY_API_KEY || "",
+  apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
   apiVersion: LATEST_API_VERSION,
   scopes: process.env.SCOPES?.split(",") || [],
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(prisma),
+  sessionStorage: prismaSessionStorage,
   distribution: "app",
   restResources,
   webhooks: {
@@ -28,7 +59,12 @@ const shopify = shopifyApp({
   },
   hooks: {
     afterAuth: async ({ session, admin }) => {
-      shopify.registerWebhooks({ session });
+      try {
+        await shopify.registerWebhooks({ session });
+        console.log('✅ Webhooks зарегистрированы');
+      } catch (error) {
+        console.error('❌ Ошибка регистрации webhooks:', error);
+      }
     },
   },
   future: {
