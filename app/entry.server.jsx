@@ -13,6 +13,9 @@ export default async function handleRequest(
   responseHeaders,
   remixContext,
 ) {
+  console.log("🚀 Server started, handling request:", request.url);
+  console.log("📡 Port:", process.env.PORT || "3000");
+  
   addDocumentResponseHeaders(request, responseHeaders);
   const userAgent = request.headers.get("user-agent");
   const callbackName = isbot(userAgent ?? "") ? "onAllReady" : "onShellReady";
