@@ -9,7 +9,7 @@
     "deploy": "shopify app deploy",
     "config:use": "shopify app config use",
     "env": "shopify app env",
-    "start": "node server.js",
+    "start": "remix-serve ./build/server/index.js",
     "postinstall": "prisma generate",
     "setup": "prisma migrate deploy",
     "docker-start": "npm run setup && npm run start",
@@ -38,8 +38,7 @@
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vite-tsconfig-paths": "^5.0.1",
-    "express": "^4.18.2"
+    "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
     "@remix-run/eslint-config": "^2.16.1",
