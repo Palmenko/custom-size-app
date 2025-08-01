@@ -10,8 +10,6 @@
     "config:use": "shopify app config use",
     "env": "shopify app env",
     "start": "remix-serve ./build/server/index.js",
-    "build": "remix vite:build",
-    "start": "remix-serve ./build/server/index.js",
     "postinstall": "prisma generate",
     "setup": "prisma migrate deploy",
     "docker-start": "npm run setup && npm run start",
