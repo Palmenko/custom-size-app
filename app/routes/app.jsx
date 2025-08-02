@@ -12,13 +12,16 @@ export const loader = async ({ request }) => {
   try {
     // Проверяем наличие необходимых переменных окружения
     if (!process.env.SHOPIFY_API_KEY || !process.env.SHOPIFY_API_SECRET) {
+      console.error("❌ Shopify API credentials not configured");
       throw new Error("Shopify API credentials not configured");
     }
     
+    console.log("🔐 Attempting to authenticate...");
     await authenticate.admin(request);
+    console.log("✅ Authentication successful");
     return { apiKey: process.env.SHOPIFY_API_KEY || "" };
   } catch (error) {
-    console.error("Authentication error:", error);
+    console.error("❌ Authentication error:", error);
     throw new Response("Authentication failed", { status: 401 });
   }
 };

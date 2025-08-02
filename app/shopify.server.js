@@ -34,7 +34,9 @@ try {
   console.log('✅ PrismaSessionStorage инициализирован');
 } catch (error) {
   console.error('❌ Ошибка инициализации PrismaSessionStorage:', error);
-  throw error;
+  // Не выбрасываем ошибку, а создаем fallback
+  console.log('⚠️ Используем fallback session storage');
+  prismaSessionStorage = null;
 }
 
 const shopify = shopifyApp({
@@ -44,7 +46,7 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(",") || [],
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: prismaSessionStorage,
+  sessionStorage: prismaSessionStorage || undefined,
   distribution: "app",
   restResources,
   webhooks: {
