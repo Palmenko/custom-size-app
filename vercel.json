@@ -1,5 +1,10 @@
 {
   "framework": "remix",
   "buildCommand": "npm run vercel-build",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "functions": {
+    "app/routes/public-test.jsx": {
+      "maxDuration": 10
+    }
+  }
 } 
