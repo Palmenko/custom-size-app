@@ -5,14 +5,9 @@ export async function loader() {
   // Проверяем наличие необходимых переменных окружения
   const hasShopifyConfig = process.env.SHOPIFY_API_KEY && process.env.SHOPIFY_API_SECRET && process.env.SHOPIFY_APP_URL;
   
-  if (hasShopifyConfig) {
-    // Если переменные настроены, перенаправляем на приложение
-    return redirect("/app");
-  }
-  
-  // Если переменные не настроены, показываем инструкции
+  // Всегда показываем информацию, не перенаправляем
   return json({
-    hasShopifyConfig: false,
+    hasShopifyConfig: hasShopifyConfig,
     missingVars: {
       SHOPIFY_API_KEY: !process.env.SHOPIFY_API_KEY,
       SHOPIFY_API_SECRET: !process.env.SHOPIFY_API_SECRET,
@@ -24,10 +19,6 @@ export async function loader() {
 
 export default function Index() {
   const { hasShopifyConfig, missingVars } = useLoaderData();
-  
-  if (hasShopifyConfig) {
-    return null; // Будет перенаправление
-  }
   
   return (
     <html>
@@ -80,6 +71,13 @@ export default function Index() {
           </ol>
           
           <p><strong>После настройки переменных окружения приложение будет автоматически перенаправлять на панель управления мерками.</strong></p>
+          
+          <h2>Тестовые маршруты:</h2>
+          <ul>
+            <li><a href="/test">Тестовый маршрут</a></li>
+            <li><a href="/status">Статус приложения</a></li>
+            <li><a href="/db-status">Статус базы данных</a></li>
+          </ul>
         </div>
       </body>
     </html>
