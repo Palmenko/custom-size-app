@@ -2,6 +2,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 export async function loader() {
+  // Новый деплой для проверки настроек безопасности
   return json({
     status: "OK",
     message: "Приложение работает!",
