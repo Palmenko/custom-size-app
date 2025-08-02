@@ -6,5 +6,16 @@
     "app/routes/public-test.jsx": {
       "maxDuration": 10
     }
-  }
+  },
+  "headers": [
+    {
+      "source": "/public-test",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    }
+  ]
 } 
