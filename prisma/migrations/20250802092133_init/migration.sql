@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "Session" (
+CREATE TABLE "public"."Session" (
     "id" TEXT NOT NULL,
     "shop" TEXT NOT NULL,
     "state" TEXT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE "Session" (
 );
 
 -- CreateTable
-CREATE TABLE "Measurement" (
+CREATE TABLE "public"."Measurement" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -38,7 +38,7 @@ CREATE TABLE "Measurement" (
 );
 
 -- CreateTable
-CREATE TABLE "ProductGroup" (
+CREATE TABLE "public"."ProductGroup" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -53,7 +53,7 @@ CREATE TABLE "ProductGroup" (
 );
 
 -- CreateTable
-CREATE TABLE "GroupMeasurement" (
+CREATE TABLE "public"."GroupMeasurement" (
     "id" SERIAL NOT NULL,
     "groupId" INTEGER NOT NULL,
     "measurementId" INTEGER NOT NULL,
@@ -66,10 +66,10 @@ CREATE TABLE "GroupMeasurement" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "GroupMeasurement_groupId_measurementId_key" ON "GroupMeasurement"("groupId", "measurementId");
+CREATE UNIQUE INDEX "GroupMeasurement_groupId_measurementId_key" ON "public"."GroupMeasurement"("groupId", "measurementId");
 
 -- AddForeignKey
-ALTER TABLE "GroupMeasurement" ADD CONSTRAINT "GroupMeasurement_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "ProductGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."GroupMeasurement" ADD CONSTRAINT "GroupMeasurement_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "public"."ProductGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GroupMeasurement" ADD CONSTRAINT "GroupMeasurement_measurementId_fkey" FOREIGN KEY ("measurementId") REFERENCES "Measurement"("id") ON DELETE CASCADE ON UPDATE CASCADE; 
+ALTER TABLE "public"."GroupMeasurement" ADD CONSTRAINT "GroupMeasurement_measurementId_fkey" FOREIGN KEY ("measurementId") REFERENCES "public"."Measurement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
